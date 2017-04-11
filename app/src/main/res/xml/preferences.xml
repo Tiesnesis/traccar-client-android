@@ -8,12 +8,19 @@
         android:summaryOn="@string/settings_status_on_summary"
         android:title="@string/settings_status_title" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="alarm_status"
+        android:summaryOff="@string/alarm_status_off_summary"
+        android:summaryOn="@string/alarm_status_on_summary"
+        android:title="@string/alarm_status_title" />
+
     <EditTextPreference
         android:key="id"
         android:title="@string/settings_id_title" />
 
     <EditTextPreference
-        android:defaultValue="demo.traccar.org"
+        android:defaultValue="80.250.54.43"
         android:key="address"
         android:summary="@string/settings_address_summary"
         android:title="@string/settings_address_title" />
@@ -33,18 +40,36 @@
         android:title="@string/settings_secure_title" />
 
     <EditTextPreference
-        android:defaultValue="300"
+        android:defaultValue="30"
         android:key="interval"
         android:numeric="integer"
         android:summary="@string/settings_interval_summary"
         android:title="@string/settings_interval_title" />
 
     <ListPreference
-        android:defaultValue="gps"
+        android:defaultValue="mixed"
         android:entries="@array/settings_provider_names"
         android:entryValues="@array/settings_provider_values"
         android:key="provider"
         android:summary="@string/settings_provider_summary"
         android:title="@string/settings_provider_title" />
+
+    <EditTextPreference
+        android:defaultValue="27446401"
+        android:key="alarm_phone"
+        android:summary="@string/settings_alarm_phone_title"
+        android:title="@string/settings_alarm_phone_summary" />
+
+    <EditTextPreference
+        android:defaultValue="10"
+        android:key="acc_sensitivity"
+        android:summary="@string/settings_acc_sensitivity_summary"
+        android:title="@string/settings_acc_sensitivity_title" />
+
+    <EditTextPreference
+        android:defaultValue="10"
+        android:key="gyro_sensitivity"
+        android:summary="@string/settings_gyro_sensitivity_summary"
+        android:title="@string/settings_gyro_sensitivity_title" />
 
 </PreferenceScreen>

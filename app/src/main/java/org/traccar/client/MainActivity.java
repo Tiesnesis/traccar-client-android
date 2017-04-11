@@ -20,12 +20,14 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -36,10 +38,13 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+
+import static org.traccar.client.PositionProvider.TAG;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
@@ -53,6 +58,11 @@ public class MainActivity extends PreferenceActivity implements OnSharedPreferen
     public static final String KEY_INTERVAL = "interval";
     public static final String KEY_PROVIDER = "provider";
     public static final String KEY_STATUS = "status";
+
+    public static final String KEY_ALARM_PHONE = "alarm_phone";
+    public static final String KEY_ACC_SENSITIVITY = "acc_sensitivity";
+    public static final String KEY_GYRO_SENSITIVITY = "gyro_sensitivity";
+    public static final String KEY_ALARM_STATUS = "alarm_status";
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
 
@@ -118,12 +128,44 @@ public class MainActivity extends PreferenceActivity implements OnSharedPreferen
             }
         });
 
+        findPreference(KEY_ALARM_PHONE).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                return newValue != null && !newValue.equals("");
+            }
+        });
+
+        findPreference(KEY_ACC_SENSITIVITY).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                return newValue != null && !newValue.equals("");
+            }
+        });
+        findPreference(KEY_GYRO_SENSITIVITY).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                return newValue != null && !newValue.equals("");
+            }
+        });
+        findPreference(KEY_ALARM_STATUS).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if ((Boolean) newValue == true){
+                    setAlarmPreferencesEnabled(false);
+                }else if ((Boolean) newValue == false){
+                    setAlarmPreferencesEnabled(true);
+                }
+                return newValue != null && !newValue.equals("");
+            }
+        });
+
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmIntent = PendingIntent.getBroadcast(this, 0, new Intent(this, AutostartReceiver.class), 0);
 
         if (sharedPreferences.getBoolean(KEY_STATUS, false)) {
             startTrackingService(true, false);
         }
+
     }
 
     private void removeLauncherIcon() {
@@ -183,6 +225,12 @@ public class MainActivity extends PreferenceActivity implements OnSharedPreferen
         findPreference(KEY_PROVIDER).setEnabled(enabled);
     }
 
+    private void setAlarmPreferencesEnabled(boolean enabled) {
+        findPreference(KEY_ALARM_PHONE).setEnabled(enabled);
+        findPreference(KEY_ACC_SENSITIVITY).setEnabled(enabled);
+        findPreference(KEY_GYRO_SENSITIVITY).setEnabled(enabled);
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(KEY_STATUS)) {
@@ -239,6 +287,21 @@ public class MainActivity extends PreferenceActivity implements OnSharedPreferen
             if (!hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 missingPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
             }
+            if (!hasPermission(Manifest.permission.CALL_PHONE)) {
+                missingPermissions.add(Manifest.permission.CALL_PHONE);
+            }
+            if (!hasPermission(Manifest.permission.RECEIVE_SMS)) {
+                missingPermissions.add(Manifest.permission.RECEIVE_SMS);
+            }
+            if (!hasPermission(Manifest.permission.READ_SMS)) {
+                missingPermissions.add(Manifest.permission.READ_SMS);
+            }
+            if (!hasPermission(Manifest.permission.SEND_SMS)) {
+                missingPermissions.add(Manifest.permission.SEND_SMS);
+            }
+            if (!hasPermission(Manifest.permission.VIBRATE)) {
+                missingPermissions.add(Manifest.permission.VIBRATE);
+            }
             if (missingPermissions.isEmpty()) {
                 permission = true;
             } else {
@@ -270,6 +333,7 @@ public class MainActivity extends PreferenceActivity implements OnSharedPreferen
     private void stopTrackingService() {
         alarmManager.cancel(alarmIntent);
         stopService(new Intent(this, TrackingService.class));
+
         setPreferencesEnabled(true);
     }
 

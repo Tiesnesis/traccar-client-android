@@ -46,6 +46,8 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
     private PowerManager.WakeLock wakeLock;
 
+    AccelerometerListener accListener;
+
     private void lock() {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
             wakeLock.acquire();
@@ -79,6 +81,8 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+
+        accListener = new AccelerometerListener(context);
     }
 
     public void start() {
@@ -91,10 +95,12 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
             Log.w(TAG, e);
         }
         networkManager.start();
+        accListener.registerReceivers();
     }
 
     public void stop() {
         networkManager.stop();
+        accListener.unregisterReceivers();
         try {
             positionProvider.stopUpdates();
         } catch (SecurityException e) {
